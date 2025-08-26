@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Memoria</title>
+  <style>
+    /* quick and dirty styling — replace with Bootstrap/Tailwind later */
+    nav {
+      background: #2c3e50;
+      padding: 0.75rem 1rem;
+    }
+    nav a {
+      color: white;
+      margin-right: 1rem;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+    }
+    header {
+      margin-bottom: 2rem;
+    }
+    main {
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{% url 'document_list' %}">Home</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}">Logout</a>
+        <a href="/admin/">Admin</a>
+      {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'signup' %}">Sign Up</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    {% block section1 %}{% endblock %}
+    {% block section2 %}{% endblock %}
+  </main>
+</body>
+</html>

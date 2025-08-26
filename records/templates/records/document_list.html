@@ -1,7 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head><title>Memoria – Records</title></head>
-<body>
+{% extends 'base.html' %}
+
+{% block section1 %}
     <h1>Memoria – Church Records</h1>
     <ul>
         {% for doc in docs %}
@@ -13,5 +12,4 @@
         <li>No documents uploaded yet.</li>
         {% endfor %}
     </ul>
-</body>
-</html>
+{% endblock %}
