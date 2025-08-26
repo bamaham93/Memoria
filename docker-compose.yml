@@ -6,5 +6,6 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - .:/app
       - ./db.sqlite3:/app/db.sqlite3   # persist database between runs
       - ./media:/app/media             # persist uploaded PDFs
