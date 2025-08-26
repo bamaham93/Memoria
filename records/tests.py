@@ -1,15 +1,13 @@
-from django.test import TestCase
-from django.urls import reverse
+from datetime import datetime
+
 from django.contrib.auth.models import User
-from .models import Document
 from django.core.files.uploadedfile import SimpleUploadedFile
-from datetime import datetime
-from django.utils import timezone
-from datetime import datetime
-from .models import Document, Category
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth.models import User
+from django.utils import timezone
+
+from .models import Document, Category
+
 
 class AuthTests(TestCase):
     def setUp(self):
@@ -114,6 +112,7 @@ class CategoryTests(TestCase):
         self.assertContains(response, "Business Meeting Doc")
         self.assertContains(response, "Business Meeting Minutes")  # Category name
 
+
 class SignupLoginLogoutTests(TestCase):
     def test_signup_creates_user_and_redirects(self):
         """Signup should create a new user and log them in"""
@@ -185,3 +184,12 @@ class SignupLoginLogoutTests(TestCase):
         self.assertContains(response, 'name="username"')
         self.assertContains(response, 'name="password1"')
         self.assertContains(response, 'name="password2"')
+
+    def test_login_template_contains_fields(self):
+        """Login form should contain username and password fields"""
+        response = self.client.get(reverse("login"))
+        self.assertEqual(response.status_code, 200)
+
+        # Check for input fields in the HTML
+        self.assertContains(response, 'name="username"')
+        self.assertContains(response, 'name="password"')
