@@ -161,3 +161,27 @@ class SignupLoginLogoutTests(TestCase):
         # Confirm user is logged out
         response = self.client.get(reverse("document_list"))
         self.assertRedirects(response, f"{reverse('login')}?next={reverse('document_list')}")
+
+    def test_invalid_signup_shows_errors(self):
+        """Invalid signup should re-render the form with errors and not create a user"""
+        response = self.client.post(reverse("signup"), {
+            "username": "baduser",
+            "password1": "abc12345",
+            "password2": "different12345",  # mismatched
+        })
+
+        # Page should not redirect, should re-render with status 200
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "The two password fields didn’t match.")  # Django default error
+        # User should not exist
+        self.assertFalse(User.objects.filter(username="baduser").exists())
+
+    def test_signup_template_contains_fields(self):
+        """Signup form should contain username, password1, and password2 fields"""
+        response = self.client.get(reverse("signup"))
+        self.assertEqual(response.status_code, 200)
+
+        # Check for input fields in the HTML
+        self.assertContains(response, 'name="username"')
+        self.assertContains(response, 'name="password1"')
+        self.assertContains(response, 'name="password2"')
