@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>Memoria – Records</title></head>
+<body>
+    <h1>Memoria – Church Records</h1>
+    <ul>
+        {% for doc in docs %}
+        <li>
+            <a href="{{ doc.file.url }}">{{ doc.title }}</a>
+            ({{ doc.uploaded_at|date:"Y-m-d" }})
+        </li>
+        {% empty %}
+        <li>No documents uploaded yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
