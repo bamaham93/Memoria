@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.pkl
+*.pyc
+*.py.class
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual Environment
+venv/
+.env/
+.venv/
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+
+# If you use local settings override
+local_settings.py
+
+# Static and collected files
+staticfiles/
+static/
+collected_static/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*~
+.project
+.pydevproject
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.*
+
+# Coverage / Testing
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.my
