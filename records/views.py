@@ -3,6 +3,7 @@ from .models import Document
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
 
 
 from django.shortcuts import render
@@ -50,7 +51,8 @@ def signup(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            return redirect("login")  # after signup, go to login
+            login(request, user)  # <--- log them in immediately
+            return redirect("document_list")
     else:
         form = UserCreationForm()
     return render(request, "records/signup.html", {"form": form})

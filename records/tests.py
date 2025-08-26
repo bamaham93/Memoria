@@ -7,6 +7,9 @@ from datetime import datetime
 from django.utils import timezone
 from datetime import datetime
 from .models import Document, Category
+from django.test import TestCase
+from django.urls import reverse
+from django.contrib.auth.models import User
 
 class AuthTests(TestCase):
     def setUp(self):
@@ -110,3 +113,51 @@ class CategoryTests(TestCase):
         response = self.client.get(reverse("document_list"))
         self.assertContains(response, "Business Meeting Doc")
         self.assertContains(response, "Business Meeting Minutes")  # Category name
+
+class SignupLoginLogoutTests(TestCase):
+    def test_signup_creates_user_and_redirects(self):
+        """Signup should create a new user and log them in"""
+        response = self.client.post(reverse("signup"), {
+            "username": "newuser",
+            "password1": "complexpassword123",
+            "password2": "complexpassword123",
+        })
+        # After signup, redirect to home
+        self.assertRedirects(response, reverse("document_list"))
+        # User should exist
+        self.assertTrue(User.objects.filter(username="newuser").exists())
+        # User should be logged in
+        response = self.client.get(reverse("document_list"))
+        self.assertEqual(str(response.context["user"]), "newuser")
+
+    def test_login_with_valid_credentials(self):
+        """Login should succeed with correct credentials"""
+        User.objects.create_user(username="testuser", password="testpass")
+        response = self.client.post(reverse("login"), {
+            "username": "testuser",
+            "password": "testpass",
+        })
+        self.assertRedirects(response, reverse("document_list"))
+        # Confirm logged in
+        response = self.client.get(reverse("document_list"))
+        self.assertTrue(response.context["user"].is_authenticated)
+
+    def test_login_with_invalid_credentials_fails(self):
+        """Login should fail with wrong password"""
+        User.objects.create_user(username="testuser", password="testpass")
+        response = self.client.post(reverse("login"), {
+            "username": "testuser",
+            "password": "wrongpass",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Please enter a correct username and password")  # Django default error
+
+    def test_logout_clears_session(self):
+        """Logout should log the user out and redirect to login"""
+        User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.post(reverse("logout"))
+        self.assertRedirects(response, reverse("login"))
+        # Confirm user is logged out
+        response = self.client.get(reverse("document_list"))
+        self.assertRedirects(response, f"{reverse('login')}?next={reverse('document_list')}")
