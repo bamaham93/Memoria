@@ -1,15 +1,71 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block section1 %}
-    <h1>Memoria – Church Records</h1>
-    <ul>
-        {% for doc in docs %}
-        <li>
-            <a href="{{ doc.file.url }}">{{ doc.title }}</a>
-            ({{ doc.uploaded_at|date:"Y-m-d" }})
-        </li>
-        {% empty %}
-        <li>No documents uploaded yet.</li>
+  <h2 class="text-2xl font-bold mb-6">Available Documents</h2>
+{% endblock %}
+
+{% block section2 %}
+  <!-- Filter Form -->
+  <form method="get" class="mb-6 flex items-end space-x-4">
+    <!-- Year Filter -->
+    <div>
+      <label for="year" class="block text-sm font-medium text-gray-700">Filter by Year</label>
+      <select name="year" id="year" class="border rounded p-1">
+        <option value="">All Years</option>
+        {% for y in years %}
+          <option value="{{ y.year }}" {% if selected_year == y.year|stringformat:"s" %}selected{% endif %}>
+            {{ y.year }}
+          </option>
         {% endfor %}
-    </ul>
+      </select>
+    </div>
+
+    <!-- Month Filter -->
+    <div>
+      <label for="month" class="block text-sm font-medium text-gray-700">Filter by Month</label>
+      <select name="month" id="month" class="border rounded p-1">
+        <option value="">All Months</option>
+        {% for value, name in months %}
+          <option value="{{ value }}" {% if selected_month == value %}selected{% endif %}>
+            {{ name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Sort Filter -->
+    <div>
+      <label for="sort" class="block text-sm font-medium text-gray-700">Sort By</label>
+      <select name="sort" id="sort" class="border rounded p-1">
+        <option value="desc" {% if selected_sort == "desc" %}selected{% endif %}>Newest First</option>
+        <option value="asc" {% if selected_sort == "asc" %}selected{% endif %}>Oldest First</option>
+      </select>
+    </div>
+
+    <!-- Apply / Clear -->
+    <div>
+      <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Apply</button>
+      <a href="{% url 'document_list' %}" class="ml-2 text-gray-600 hover:underline">Clear Filters</a>
+    </div>
+  </form>
+
+  <!-- Document List -->
+  <div class="space-y-3">
+    {% for doc in docs %}
+      <div class="p-4 bg-white shadow rounded">
+        <div class="flex justify-between items-center">
+          <span class="font-semibold">{{ doc.title }}</span>
+          <span class="text-gray-500 text-sm">{{ doc.uploaded_at|date:"Y-m-d" }}</span>
+        </div>
+        {% if doc.short_description %}
+          <p class="text-gray-700 text-sm mt-1">{{ doc.short_description }}</p>
+        {% endif %}
+        <div class="mt-2">
+          <a href="{{ doc.file.url }}" class="text-blue-600 hover:underline">Download</a>
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-gray-600">No documents found.</p>
+    {% endfor %}
+  </div>
 {% endblock %}

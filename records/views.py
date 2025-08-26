@@ -4,9 +4,44 @@ from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 
 
+from django.shortcuts import render
+from .models import Document
+
 def document_list(request):
-    docs = Document.objects.all().order_by("-uploaded_at")
-    return render(request, "records/document_list.html", {"docs": docs})
+    sort = request.GET.get("sort", "desc")  # default: descending (newest first)
+
+    docs = Document.objects.all()
+    if sort == "asc":
+        docs = docs.order_by("uploaded_at")     # oldest → newest
+    else:
+        docs = docs.order_by("-uploaded_at")    # newest → oldest
+
+    year = request.GET.get("year")
+    month = request.GET.get("month")
+
+    if year:
+        docs = docs.filter(uploaded_at__year=year)
+    if month:
+        docs = docs.filter(uploaded_at__month=month)
+
+    years = Document.objects.dates("uploaded_at", "year", order="DESC")
+    months = [
+        ("01", "January"), ("02", "February"), ("03", "March"),
+        ("04", "April"), ("05", "May"), ("06", "June"),
+        ("07", "July"), ("08", "August"), ("09", "September"),
+        ("10", "October"), ("11", "November"), ("12", "December"),
+    ]
+
+    return render(request, "records/document_list.html", {
+        "docs": docs,
+        "years": years,
+        "months": months,
+        "selected_year": year,
+        "selected_month": month,
+        "selected_sort": sort,
+    })
+
+
 
 def signup(request):
     if request.method == "POST":

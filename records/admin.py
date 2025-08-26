@@ -3,4 +3,5 @@ from .models import Document
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
-    list_display = ("title", "uploaded_at")
+    list_display = ("title", "uploaded_at", "short_description")
+    search_fields = ("title", "description")

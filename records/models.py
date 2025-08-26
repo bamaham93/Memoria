@@ -1,10 +1,17 @@
 from django.db import models
 
-# Create your models here.
 class Document(models.Model):
     title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)  # new field
     file = models.FileField(upload_to="pdfs/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+
+    @property
+    def short_description(self):
+        """Return a truncated version of the description (for previews)."""
+        if not self.description:
+            return ""
+        return (self.description[:75] + "…") if len(self.description) > 75 else self.description
