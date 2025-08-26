@@ -6,6 +6,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./db.sqlite3:/app/db.sqlite3
       - ./media:/app/media   # persist uploads
     environment:
       - DJANGO_SUPERUSER_USERNAME=admin
