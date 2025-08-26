@@ -2,11 +2,13 @@ from django.shortcuts import render
 from .models import Document
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 
 
 from django.shortcuts import render
 from .models import Document
 
+@login_required
 def document_list(request):
     sort = request.GET.get("sort", "desc")  # default: descending (newest first)
 

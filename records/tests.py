@@ -1,3 +1,112 @@
 from django.test import TestCase
+from django.urls import reverse
+from django.contrib.auth.models import User
+from .models import Document
+from django.core.files.uploadedfile import SimpleUploadedFile
+from datetime import datetime
+from django.utils import timezone
+from datetime import datetime
+from .models import Document, Category
 
-# Create your tests here.
+class AuthTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+
+    def test_redirect_if_not_logged_in(self):
+        """Unauthenticated users should be redirected to /login/"""
+        response = self.client.get(reverse("document_list"))
+        self.assertRedirects(response, f"{reverse('login')}?next={reverse('document_list')}")
+
+    def test_logged_in_can_access_docs(self):
+        """Logged in users should see the documents page"""
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(reverse("document_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Available Documents")
+
+
+class DocumentTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
+
+        # Create documents across different years and months
+        self.doc1 = Document.objects.create(
+            title="Doc 2023 Jan",
+            description="Old doc",
+            file=SimpleUploadedFile("doc1.pdf", b"PDF content"),
+            uploaded_at=timezone.make_aware(datetime(2023, 1, 10))
+        )
+        self.doc2 = Document.objects.create(
+            title="Doc 2024 Mar",
+            description="Mid doc",
+            file=SimpleUploadedFile("doc2.pdf", b"PDF content"),
+            uploaded_at=timezone.make_aware(datetime(2024, 3, 5))
+        )
+        self.doc3 = Document.objects.create(
+            title="Doc 2024 Dec",
+            description="Recent doc",
+            file=SimpleUploadedFile("doc3.pdf", b"PDF content"),
+            uploaded_at=timezone.make_aware(datetime(2024, 12, 20))
+        )
+
+    def test_document_display(self):
+        """Uploaded documents appear in the list"""
+        response = self.client.get(reverse("document_list"))
+        self.assertContains(response, "Doc 2023 Jan")
+        self.assertContains(response, "Doc 2024 Mar")
+        self.assertContains(response, "Doc 2024 Dec")
+
+    def test_filter_by_year(self):
+        """Filtering by year only shows docs from that year"""
+        response = self.client.get(reverse("document_list"), {"year": "2023"})
+        self.assertContains(response, "Doc 2023 Jan")
+        self.assertNotContains(response, "Doc 2024 Mar")
+        self.assertNotContains(response, "Doc 2024 Dec")
+
+    def test_filter_by_month(self):
+        """Filtering by month only shows docs from that month"""
+        response = self.client.get(reverse("document_list"), {"month": "03"})
+        self.assertContains(response, "Doc 2024 Mar")
+        self.assertNotContains(response, "Doc 2023 Jan")
+        self.assertNotContains(response, "Doc 2024 Dec")
+
+    def test_filter_by_year_and_month(self):
+        """Filtering by year + month narrows results correctly"""
+        response = self.client.get(reverse("document_list"), {"year": "2024", "month": "12"})
+        self.assertContains(response, "Doc 2024 Dec")
+        self.assertNotContains(response, "Doc 2024 Mar")
+        self.assertNotContains(response, "Doc 2023 Jan")
+
+    def test_sort_oldest_first(self):
+        """Sort=asc shows oldest doc first"""
+        response = self.client.get(reverse("document_list"), {"sort": "asc"})
+        content = response.content.decode()
+        self.assertTrue(content.index("Doc 2023 Jan") < content.index("Doc 2024 Mar") < content.index("Doc 2024 Dec"))
+
+    def test_sort_newest_first(self):
+        """Sort=desc shows newest doc first"""
+        response = self.client.get(reverse("document_list"), {"sort": "desc"})
+        content = response.content.decode()
+        self.assertTrue(content.index("Doc 2024 Dec") < content.index("Doc 2024 Mar") < content.index("Doc 2023 Jan"))
+
+
+class CategoryTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
+
+        self.category = Category.objects.create(name="Business Meeting Minutes")
+        self.doc = Document.objects.create(
+            title="Business Meeting Doc",
+            description="Minutes from the meeting",
+            category=self.category,
+            file=SimpleUploadedFile("doc.pdf", b"PDF content"),
+            uploaded_at=timezone.now()
+        )
+
+    def test_category_badge_displayed(self):
+        """Category badge should show in document list"""
+        response = self.client.get(reverse("document_list"))
+        self.assertContains(response, "Business Meeting Doc")
+        self.assertContains(response, "Business Meeting Minutes")  # Category name

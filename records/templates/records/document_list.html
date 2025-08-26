@@ -50,30 +50,32 @@
   </form>
 
   <!-- Document List -->
- <div class="space-y-3">
-  {% for doc in docs %}
-    <div class="p-4 bg-white shadow rounded">
-      <div class="flex justify-between items-center">
-        <div>
-          <span class="font-semibold">{{ doc.title }}</span>
-          {% if doc.category %}
-            <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 text-blue-800">
-              {{ doc.get_category_display|default:doc.category }}
-            </span>
-          {% endif %}
+  <div class="space-y-3">
+    {% for doc in docs %}
+      <div class="p-4 bg-white shadow rounded">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <a href="{{ doc.file.url }}" class="font-semibold text-blue-600 hover:underline">
+              {{ doc.title }}
+            </a>
+            {% if doc.category %}
+              <span class="px-2 py-0.5 text-xs font-medium rounded bg-blue-100 text-blue-800">
+                {% if doc.get_category_display %}
+                  {{ doc.get_category_display }}
+                {% else %}
+                  {{ doc.category }}
+                {% endif %}
+              </span>
+            {% endif %}
+          </div>
+          <span class="text-gray-500 text-sm">{{ doc.uploaded_at|date:"Y-m-d" }}</span>
         </div>
-        <span class="text-gray-500 text-sm">{{ doc.uploaded_at|date:"Y-m-d" }}</span>
+        {% if doc.short_description %}
+          <p class="text-gray-700 text-sm mt-1">{{ doc.short_description }}</p>
+        {% endif %}
       </div>
-      {% if doc.short_description %}
-        <p class="text-gray-700 text-sm mt-1">{{ doc.short_description }}</p>
-      {% endif %}
-      <div class="mt-2">
-        <a href="{{ doc.file.url }}" class="text-blue-600 hover:underline">Download</a>
-      </div>
-    </div>
-  {% empty %}
-    <p class="text-gray-600">No documents found.</p>
-  {% endfor %}
-</div>
-
+    {% empty %}
+      <p class="text-gray-600">No documents found.</p>
+    {% endfor %}
+  </div>
 {% endblock %}

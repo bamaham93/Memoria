@@ -1,4 +1,7 @@
 from django.db import models
+from datetime import datetime
+
+
 
 
 class Category(models.Model):
@@ -7,12 +10,16 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name_plural = "Categories"
+
 class Document(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     file = models.FileField(upload_to="pdfs/")
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_at = models.DateTimeField(default=datetime.now)
+
 
     def __str__(self):
         return self.title
