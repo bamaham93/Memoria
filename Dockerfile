@@ -8,21 +8,23 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system deps (SQLite, etc.)
+# Install system dependencies (SQLite, etc.)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python requirements
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . .
 
+# Collect static files (for Django Admin CSS/JS, etc.)
+RUN python manage.py collectstatic --noinput
 
 # Expose Django on port 8000
 EXPOSE 8000
 
-# Start with Gunicorn
-CMD ["gunicorn", "memoria.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Run migrations, then start Gunicorn
+CMD ["sh", "-c", "python manage.py migrate && gunicorn memoria.wsgi:application --bind 0.0.0.0:8000"]
