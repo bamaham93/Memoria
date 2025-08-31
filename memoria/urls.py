@@ -22,6 +22,8 @@ from records import views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path("propresenter/", include("ProPresenterInterface.urls")),
+    path(),
     path("admin/", admin.site.urls),
     path("", views.document_list, name="document_list"),
     path("signup/", views.signup, name="signup"),

@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.1.10.199',]
 
 INSTALLED_APPS = [
     'records',
+    'ProPresenterInterface',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
